@@ -1,8 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 import { openai } from '@/lib/openai';
 
+// POST: Generate CV Content from Work Log
 export async function POST(req: Request) {
   const { logContent } = await req.json();
+
+  if (!logContent) {
+    return NextResponse.json({ error: 'logContent is required.' }, { status: 400 });
+  }
 
   try {
     const chat = await openai.chat.completions.create({
@@ -14,9 +19,10 @@ export async function POST(req: Request) {
       temperature: 0.7,
     });
 
-    return NextResponse.json({ result: chat.choices[0].message.content });
+    const result = chat.choices[0]?.message?.content || '';
+    return NextResponse.json({ result });
   } catch (err) {
-    console.error('Failed to call OpenAI API:', err);
-    return NextResponse.json({ error: 'Failed to generate resume content.' }, { status: 500 });
+    console.error('OpenAI API Error:', err);
+    return NextResponse.json({ error: 'Failed to generate content.' }, { status: 500 });
   }
 }
