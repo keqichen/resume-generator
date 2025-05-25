@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
-import { WorkExperience, ResumeData, EducationExperience} from '@/lib/types';
+import { WorkExperience, ResumeData, EducationExperience, SideProject} from '@/lib/types';
 
 export default function ResumesPage() {
   const [formData, setFormData] = useState<ResumeData>({
@@ -17,6 +17,7 @@ export default function ResumesPage() {
       skillsList: [],
       educationExperienceList: [],
       workExperienceList: [],
+      sideProjectList:[]
     });
 
   const isFormValid = formData?.name.trim() && formData?.email.trim();
@@ -58,6 +59,16 @@ export default function ResumesPage() {
     { label: 'Company Name', field: 'company' },
     { label: 'Job Title', field: 'title' },
     { label: 'City', field: 'city' },
+    { label: 'Start Date', field: 'startDate', type: 'date' },
+    { label: 'End Date', field: 'endDate', type: 'date' },
+  ];
+
+    const sideProjectFields: {
+    label: string;
+    field: keyof SideProject;
+    type?: string;
+  }[] = [
+    { label: 'Project Name', field: 'projectName' },
     { label: 'Start Date', field: 'startDate', type: 'date' },
     { label: 'End Date', field: 'endDate', type: 'date' },
   ];
@@ -134,7 +145,7 @@ export default function ResumesPage() {
 
         {/* 💼 Work Experience Section */}
         <div className="p-4 border rounded bg-white shadow space-y-4">
-          <h2 className="text-xl font-bold font-mono">💼 Experience</h2>
+          <h2 className="text-xl font-bold font-mono">💼 Work Experience</h2>
 
           {formData?.workExperienceList?.map((exp, idx) => (
             <div key={idx} className="p-4 border rounded bg-gray-50 space-y-2 relative">
@@ -193,10 +204,70 @@ export default function ResumesPage() {
           </button>
         </div>
 
+        {/* Side Projects Section */}
+        <div className="p-4 border rounded bg-white shadow space-y-4">
+          <h2 className="text-xl font-bold font-mono">💼 Side Projects</h2>
+
+          {formData?.sideProjectList?.map((exp, idx) => (
+            <div key={idx} className="p-4 border rounded bg-gray-50 space-y-2 relative">
+              <button 
+                type="button"
+                onClick={() => {
+                  const newList = [...(formData.sideProjectList || [])];
+                  newList.splice(idx, 1);
+                  setFormData({ ...formData, sideProjectList: newList });
+                }}
+                className="absolute top-2 right-2 text-gray-500 hover:text-red-500 font-bold"
+              >
+                ✖️
+              </button>
+              {sideProjectFields.map(({ label, field, type = 'text' }) => (
+                <div key={field} className="space-y-1">
+                  <label className="block text-gray-700 font-mono">{label}</label>
+                  <input
+                    type={type}
+                    className="w-full p-2 border border-gray-300 rounded font-mono"
+                    value={exp[field] || ''}
+                    onChange={(e) => {
+                      const newList = [...(formData.sideProjectList || [])];
+                      newList[idx][field] = e.target.value;
+                      setFormData({ ...formData, sideProjectList: newList });
+                    }}
+                  />
+                </div>
+              ))}
+              <div className="space-y-1">
+                <label className="block text-gray-700 font-mono">Description</label>
+                <textarea
+                  className="w-full p-2 border border-gray-300 rounded font-mono"
+                  rows={3}
+                  value={exp.description || ''}
+                  onChange={(e) => {
+                    const newList = [...(formData.workExperienceList || [])];
+                    newList[idx].description = e.target.value;
+                    setFormData({ ...formData, workExperienceList: newList });
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+
+          <button
+            type="button"
+            onClick={() => {
+              const newExp = { projectName: '', startDate: '', endDate: '', description: '' };
+              const updatedList = [...(formData.sideProjectList || []), newExp];
+              setFormData({ ...formData, sideProjectList: updatedList });
+            }}
+            className="font-mono px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 cursor-pointer"
+          >
+            ➕ Add New Side Projects
+          </button>
+        </div>
+
         {/* 💼 Education Experience Section */}
         <div className="p-4 border rounded bg-white shadow space-y-4">
-          <h2 className="text-xl font-bold font-mono">💼 Experience</h2>
-
+          <h2 className="text-xl font-bold font-mono">🏫 Education</h2>
           {formData?.educationExperienceList?.map((exp, idx) => (
             <div key={idx} className="p-4 border rounded bg-gray-50 space-y-2 relative">
               <button 
@@ -326,7 +397,7 @@ export default function ResumesPage() {
               }
 
               if (data && data.id) {
-                window.open(`/preview/${data.id}`, '_blank');
+                window.open(`/api/preview?id=${data.id}`, '_blank');
               } else {
                 alert('⚠️ Please save the resume before previewing.');
               }

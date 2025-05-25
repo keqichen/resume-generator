@@ -9,6 +9,13 @@ export interface WorkExperience {
   description: string;
 }
 
+export interface SideProject {
+  projectName: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+}
+
 export interface EducationExperience {
   school: string;
   degree: string;
@@ -29,6 +36,7 @@ export interface ResumeData {
   skillsList?: string[];      
   workExperienceList?: WorkExperience[];
   educationExperienceList?: EducationExperience[];
+  sideProjectList?: SideProject[]
 }
 
 export interface ResumeRecord {
